@@ -20,6 +20,11 @@ class Curve:
         self.y = np.append(self.y, [ay])
         self.i += 1
 
+    def remove_point(self, ind):
+        self.x = np.delete(self.x, ind)
+        self.y = np.delete(self.y, ind)
+        self.i -= 1
+
     def change_color(self, c):
         self.color = c
 
@@ -39,14 +44,14 @@ class Curve:
         self.control_points = 0
 
     def shiftv(self, vx, vy):
-        self.x = self.x+vx
+        self.x = vx+self.x
         self.y = self.y+vy
 
     def edit_point(self, k, newx, newy):
         self.x[k] = newx
         self.y[k] = newy
 
-    def rev_order(self, k, j):
+    def swap_points(self, k, j):
         tx = self.x[k]
         ty = self.y[k]
         self.x[k] = self.x[j]
