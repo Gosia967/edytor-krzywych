@@ -2,6 +2,7 @@ import numpy as np
 
 # types:
 # 1. polyline
+# 2. Lagrange polynomial
 
 
 class Curve:
@@ -58,3 +59,7 @@ class Curve:
         self.y[k] = self.y[j]
         self.x[j] = tx
         self.y[j] = ty
+
+    def change_type(self, k):
+        if k < 8:
+            self.type = k
