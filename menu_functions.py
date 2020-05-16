@@ -1,4 +1,5 @@
 from classcurve import *
+from algorithms import *
 
 import matplotlib.pyplot as plt
 from matplotlib.collections import EventCollection
@@ -31,9 +32,20 @@ def show_curves():
     ax.set(xlim=(0, 100), ylim=(0, 100))
     for c in curves:
         if c.visibility == 1:
-            ax.plot(c.x, c.y, label=i, linewidth=c.thick, color=c.color)
-            ax.legend()
-            # plt.gca().add_artist(plt.legend())
+            if c.type == 1:
+                ax.plot(c.x, c.y, label=i, linewidth=c.thick, color=c.color)
+            if c.type == 2:
+                if c.i > 1:
+                    t1 = np.arange(0.0, 100.0, 0.1)
+                    ax.plot(t1, Lagrange(t1, c.x, c.y, c.i), label=i,
+                            linewidth=c.thick, color=c.color)
+            if c.type == 3:
+                if c.i > 1:
+                    t1 = np.arange(0.0, 100.0, 0.1)
+                    ax.plot(Bezier(t1, 0, 100, c.x, c.i), Bezier(t1, 0, 100, c.y, c.i), label=i,
+                            linewidth=c.thick, color=c.color)
+                # ax.legend()
+                # plt.gca().add_artist(plt.legend())
     for c in curves:
         if c.control_points:
             ax.plot(c.x, c.y, ".", color=c.color)
@@ -147,4 +159,11 @@ def undo(event):
     global curves, i
     c = curves[i]
     c.remove_point(c.i-1)
+    show_curves()
+
+
+def change_type(event):
+    global curves, i, activtext
+    c = curves[i]
+    c.change_type(int(activtext))
     show_curves()
