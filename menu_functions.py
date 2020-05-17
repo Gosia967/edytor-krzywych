@@ -41,11 +41,29 @@ def show_curves():
                             linewidth=c.thick, color=c.color)
             if c.type == 3:
                 if c.i > 1:
-                    t1 = np.arange(0.0, 100.0, 0.1)
-                    ax.plot(Bezier(t1, 0, 100, c.x, c.i), Bezier(t1, 0, 100, c.y, c.i), label=i,
+                    #t1 = np.arange(0.0, 100.0, 0.1)
+                    # ax.plot(Bezier(t1, 0, 100, c.x, c.i), Bezier(t1, 0, 100, c.y, c.i), label=i,
+                    #       linewidth=c.thick, color=c.color)
+                    t1 = np.arange(c.x[0], c.x[c.i-1], 0.1)
+                    ax.plot(Bezier(t1, c.x[0], c.x[c.i-1], c.x, c.i), Bezier(t1, c.x[0], c.x[c.i-1], c.y, c.i), label=i,
                             linewidth=c.thick, color=c.color)
                 # ax.legend()
                 # plt.gca().add_artist(plt.legend())
+            if c.type == 4:
+                if c.i > i:
+                    # print("here")
+                    M = deterMnifs3(c.x, c.y, c.i)
+                    # print("here")
+                    for k in range(1, c.i):
+                        # print(k)
+                        mx = max(c.x[k-1], c.x[k])
+                        mn = min(c.x[k-1], c.x[k])
+                        hk = mx-mn
+                        t1 = np.arange(mn, mx, hk/100)
+                        ax.plot(t1, NISF3(t1, c.x[k], c.y[k], c.x[k-1], c.y[k-1], M[k], M[k-1]), label=i,
+                                linewidth=c.thick, color=c.color)
+                        # ax.plot(t1, t1,
+                        #       linewidth=c.thick, color=c.color)
     for c in curves:
         if c.control_points:
             ax.plot(c.x, c.y, ".", color=c.color)
