@@ -185,3 +185,24 @@ def change_type(event):
     c = curves[i]
     c.change_type(int(activtext))
     show_curves()
+
+
+def division_curve_point(event):
+    global curves, i, n, activtext
+    print("here")
+    c = curves[i]
+    if c.type == 3:
+        t = int(activtext)
+        X = c.x
+        Y = c.y
+        np = c.i
+        c.x, c.y = deCasteljauleft(t, X[0], X[np-1], X, Y, np)
+        # print(c.x)
+        d = Curve()
+        d.i = c.i
+        d.type = c.type
+        d.color = c.color
+        d.x, d.y = deCasteljauright(t, X[0], X[np-1], X, Y, np)
+        n += 1
+        curves.append(d)
+        show_curves()
