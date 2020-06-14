@@ -110,7 +110,8 @@ def show_curves():
 
     for c in curves:
         if c.control_points and c.i > 0:
-            ax.plot(c.x, c.y, ".", color=c.color)
+            ax.plot(c.x, c.y, ".", markersize=c.points_size,
+                    color=c.points_color)
             if curves[i] == c:
                 if c.color != 'red':
                     # print("here")
@@ -240,6 +241,21 @@ def change_color_of(event):
     c = curves[i]
     if (is_color(activtext)):
         c.change_color(activtext)
+    show_curves()
+
+
+def change_points_color(event):
+    global curves, i, activtext
+    c = curves[i]
+    if (is_color(activtext)):
+        c.change_point_color(activtext)
+    show_curves()
+
+
+def change_points_size(event):
+    global curves, i, activtext
+    c = curves[i]
+    c.change_point_size(float(activtext))
     show_curves()
 
 
@@ -450,3 +466,8 @@ def rotate(event):
     c = curves[i]
     c.rotate(float(activtext))
     show_curves()
+
+
+def save(event):
+    global activtext
+    plt.savefig(activtext)

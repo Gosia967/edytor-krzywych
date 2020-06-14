@@ -18,6 +18,7 @@ class Curve:
         self.type = 1
         self.i = 0  # liczba punktow
         self.points_color = 'blue'
+        self.points_size = 5.0
 
     def add_point(self, ax, ay):
         self.x = np.append(self.x, [ax])
@@ -91,3 +92,9 @@ class Curve:
                 math.sin(math.radians(alpha))
             self.y[j] = ex*math.sin(math.radians(alpha))+ey * \
                 math.cos(math.radians(alpha))
+
+    def change_point_size(self, k):
+        self.points_size = k
+
+    def change_point_color(self, col):
+        self.points_color = col

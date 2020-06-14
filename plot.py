@@ -98,11 +98,20 @@ btnmovepoint.connect("clicked", move_point)
 btnweight = Gtk.Button(label="Zmień wagę")
 grid.attach(btnweight, 0, 19, 1, 1)
 btnweight.connect("clicked", change_weight)
+btncolorcp = Gtk.Button(label="Zmień kolor punktów kontrolnych")
+grid.attach(btncolorcp, 0, 26, 1, 1)
+btncolorcp.connect("clicked", change_points_color)
+btnsizecp = Gtk.Button(label="Zmień rozmiar punktów kontrolnych")
+grid.attach(btnsizecp, 0, 27, 1, 1)
+btnsizecp.connect("clicked", change_points_size)
 
 
 btnundo = Gtk.Button(label="Cofnij dodanie punktu")
 grid.attach(btnundo, 10, 0, 1, 1)
 btnundo.connect("clicked", undo)
+btnsave = Gtk.Button(label="Zapisz obrazek")
+grid.attach(btnsave, 11, 0, 1, 1)
+btnsave.connect("clicked", save)
 
 
 entry = Gtk.Entry()
@@ -129,12 +138,12 @@ grid.attach(ylabel, 8, 0, 1, 1)
 
 sw = Gtk.ScrolledWindow(hexpand=True, vexpand=True)
 # win.add(sw)
-grid.attach(sw, 1, 1, 40, 40)
+grid.attach(sw, 1, 1, 60, 100)  # 40,40
 
 
 #canvas.mpl_connect('button_press_event', add_point_to)
 
-canvas.set_size_request(800, 600)
+canvas.set_size_request(600, 600)  # 800, 600
 sw.add_with_viewport(canvas)
 canvas.draw_idle()
 win.show_all()
