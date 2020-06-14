@@ -1,3 +1,4 @@
+from time import sleep
 from classcurve import *
 from algorithms import *
 
@@ -6,6 +7,7 @@ from matplotlib.collections import EventCollection
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_gtk3agg import (
     FigureCanvasGTK3Agg as FigureCanvas)
+from matplotlib import colors as mcolors
 import numpy as np
 from gi.repository import Gtk
 import gi
@@ -40,10 +42,11 @@ def show_curves():
     global curves, i, ip
     plt.cla()
     ax.set(xlim=(0, 100), ylim=(0, 100))
-    nc = 0
+    nclabel = 0
     for c in curves:
         if c.visibility == 1:
             if c.type == 1:
+                #print("nie śpię")
                 ax.plot(c.x, c.y, label=i, linewidth=c.thick, color=c.color)
             if c.type == 2:
                 if c.i > 1:
@@ -55,11 +58,23 @@ def show_curves():
                     # t1 = np.arange(0.0, 100.0, 0.1)
                     # ax.plot(Bezier(t1, 0, 100, c.x, c.i), Bezier(t1, 0, 100, c.y, c.i), label=i,
                     #       linewidth=c.thick, color=c.color)
-                    t1 = np.arange(c.x[0], c.x[c.i-1], 0.1)
+                    mn = min(c.x[0], c.x[c.i-1])
+                    mx = max(c.x[0], c.x[c.i-1])
+                    t1 = np.arange(mn, mx, 0.01)
                     ax.plot(Bezier(t1, c.x[0], c.x[c.i-1], c.x, c.i), Bezier(t1, c.x[0], c.x[c.i-1], c.y, c.i), label=i,
                             linewidth=c.thick, color=c.color)
+                    #t1 = np.arange(c.x[0], c.x[c.i-1], 0.1)
+                    # ax.plot(Bezier(t1, c.x[0], c.x[c.i-1], c.x, c.i), Bezier(t1, c.x[0], c.x[c.i-1], c.y, c.i), label=i,
+                    #       linewidth=c.thick, color=c.color)
+            if c.type == 6:
+                if c.i > 1:
+                    mn = min(c.x[0], c.x[c.i-1])
+                    mx = max(c.x[0], c.x[c.i-1])
+                    t1 = np.arange(mn, mx, 0.1)
+                    ax.plot(ratBezier(t1, c.x[0], c.x[c.i-1], c.x, c.w, c.i), ratBezier(t1, c.x[0], c.x[c.i-1], c.y, c.w, c.i), label=i,
+                            linewidth=c.thick, color=c.color)
             if c.type == 4:
-                if c.i > i:
+                if c.i > 1:
                     # print("here")
                     M = deterMnifs3(c.x, c.y, c.i)
                     # print("here")
@@ -74,7 +89,7 @@ def show_curves():
                         # ax.plot(t1, t1,
                         #       linewidth=c.thick, color=c.color)
             if c.type == 5:
-                if c.i > i:
+                if c.i > 1:
                     # print("here")
                     M = deterMnofs3(c.x, c.y, c.i)
                     # print("here")
@@ -89,10 +104,12 @@ def show_curves():
                         # ax.plot(t1, t1,
                         #       linewidth=c.thick, color=c.color)
             if c.i > 1:
-                ax.annotate(str(nc+1),
+                ax.annotate(str(nclabel+1),
                             ((9*c.x[0]+c.x[1])/10, (9*c.y[0]+c.y[1])/10), color="red")
+                nclabel += 1
+
     for c in curves:
-        if c.control_points:
+        if c.control_points and c.i > 0:
             ax.plot(c.x, c.y, ".", color=c.color)
             if curves[i] == c:
                 if c.color != 'red':
@@ -157,7 +174,7 @@ def on_release(event):
 
 
 def move_point(event):
-    global canv_add_point, canvas
+    global canv_add_point, canv_motion, canv_release, canvas
     canvas.mpl_disconnect(canv_add_point)
     #canv_choose_point = canvas.mpl_connect('button_press_event', change_point)
     canv_add_point = canvas.mpl_connect('button_press_event', moving_point)
@@ -184,10 +201,11 @@ def new_curve(event):
     canvas.mpl_disconnect(canv_add_point)
     canv_add_point = canvas.mpl_connect('button_press_event', add_point_to)
     c = Curve()
-    curves.append(c)
+    # curves.append(c)
+    curves = np.append(curves, [c])
     i = n
     n += 1
-    actcurindlabel.set_text(str(i))
+    actcurindlabel.set_text(str(i+1))
 
 
 def change_activtext(widget, event):
@@ -205,10 +223,23 @@ def change_activy(widget, event):
     activy = widget.get_text()
 
 
+def is_color(col):
+    colors = dict(mcolors.BASE_COLORS, **mcolors.CSS4_COLORS)
+    by_hsv = sorted((tuple(mcolors.rgb_to_hsv(mcolors.to_rgba(color)[:3])), name)
+                    for name, color in colors.items())
+    sorted_names = [name for hsv, name in by_hsv]
+    for i, name in enumerate(sorted_names):
+        # print(name)
+        if name == col:
+            return True
+    return False
+
+
 def change_color_of(event):
     global curves, i, activtext, canvas
     c = curves[i]
-    c.change_color(activtext)
+    if (is_color(activtext)):
+        c.change_color(activtext)
     show_curves()
 
 
@@ -241,7 +272,7 @@ def show_cover_points(event):
 
 def change_activ_curve(event):
     global i, activtext, n
-    k = int(activtext)
+    k = int(activtext) - 1
     if k < n:
         i = k
     actcurindlabel.set_text(str(i+1))
@@ -278,10 +309,11 @@ def swap_p(event):
 def undo(event):
     global curves, i, ip
     c = curves[i]
-    if ip == c.i-1:
-        ip = 0
-    c.remove_point(c.i-1)
-    show_curves()
+    if c.i > 0:
+        if ip == c.i-1:
+            ip = 0
+        c.remove_point(c.i-1)
+        show_curves()
 
 
 def change_type(event):
@@ -305,6 +337,7 @@ def division_curve_point(event):
         # print(c.x)
         d = Curve()
         d.i = c.i
+        d.w = c.w
         d.type = c.type
         d.color = c.color
         d.thick = c.thick
@@ -312,3 +345,108 @@ def division_curve_point(event):
         n += 1
         curves.append(d)
         show_curves()
+
+
+def change_weight(event):
+    global curves, i, activtext, ip
+    c = curves[i]
+    c.change_weight(ip, int(activtext))
+    show_curves()
+
+
+def del_curve(event):
+    global curves, i, n, ip
+    if n > 0:
+        if n == 1:
+            curves = []
+        if n == 2:
+            curves = np.delete(curves, i)
+            # print("hello")
+            # print(curves[0])
+            c = curves[0]
+            curves = []
+            curves = np.append(curves, [c])
+        else:
+            curves = np.delete(curves, i)
+        n -= 1
+        ip = 0
+        i = 0
+        show_curves()
+
+
+def transpose(event):
+    # transpozycja a(activx) w b(activy)
+    global curves, i, n, activx, activy
+    a = int(activx) - 1
+    b = int(activy)-1
+    xp = curves[a].x
+    yp = curves[a].y
+    wp = curves[a].w
+    alpha = 0.0
+    delta = 0.1
+    for k in range(0, 11):
+        curves[a].x = alpha*curves[b].x + (1-alpha)*xp
+        curves[a].y = alpha*curves[b].y + (1-alpha)*yp
+        curves[a].w = alpha*curves[b].w + (1-alpha)*wp
+        alpha += delta
+        sleep(1)
+        print("śpij kochany śpij")
+        show_curves()
+
+
+def downdeg(event):
+    global curves, i, n
+    c = curves[i]
+    if c.type == 3:
+        c.x, c.y = degdown(c.x, c.y, c.i)
+        c.i -= 1
+        c.w = np.delete(c.w, c.i)
+        show_curves()
+
+
+def updeg(event):
+    global curves, i, n
+    c = curves[i]
+    if c.type == 3:
+        c.x, c.y = degup(c.x, c.y, c.i)
+        c.i += 1
+        c.w = np.append(c.w, [1.0])
+        show_curves()
+
+
+def C1(event):
+    global curves, i, activtext, n
+    j = int(activtext) - 1
+    if j < n:
+       # print(i)
+        # print(j)
+        c = curves[i]
+        d = curves[j]
+        vx = c.x[c.i-1] - d.x[0]
+        vy = c.y[c.i-1] - d.y[0]
+        d.shiftv(vx, vy)
+        pc = d.x[0]
+        pa = c.x[0]
+        pb = d.x[d.i-1]
+        n1 = c.i-1
+        m1 = d.i-1
+        if d.i > 1:
+            d.x[1] = (d.x[0]*(n1/(pc-pa)+m1/(pb-pc)) -
+                      c.x[n1-1]*n1/(pc-pa))*(pb-pc)/m1
+            d.y[1] = (d.y[0]*(n1/(pc-pa)+m1/(pb-pc)) -
+                      c.y[n1-1]*n1/(pc-pa))*(pb-pc)/m1
+        show_curves()
+
+
+def scale(event):
+    global curves, i, activtext
+    c = curves[i]
+    c.scale(float(activtext))
+    show_curves()
+
+
+def rotate(event):
+    global curves, i, activtext
+    c = curves[i]
+    c.rotate(float(activtext))
+    show_curves()
