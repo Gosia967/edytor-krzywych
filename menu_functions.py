@@ -17,6 +17,8 @@ curves = []
 i = 0  # indeks aktualnej krzywej
 ip = 0  # indeks aktualnego punktu
 n = 0  # liczba krzywych
+entryx = Gtk.Entry()
+entryy = Gtk.Entry()
 activtext = "1"
 activx = "0"
 activy = "0"
@@ -31,7 +33,7 @@ ax.plot([], [])
 canvas = FigureCanvas(fig)  # a Gtk.DrawingArea
 
 # obsluga myszki - podlaczenia
-#canv_add_point = canvas.mpl_connect('button_press_event', add_point_to)
+# canv_add_point = canvas.mpl_connect('button_press_event', add_point_to)
 canv_add_point = None
 canv_motion = None
 canv_release = None
@@ -46,7 +48,7 @@ def show_curves():
     for c in curves:
         if c.visibility == 1:
             if c.type == 1:
-                #print("nie śpię")
+                # print("nie śpię")
                 ax.plot(c.x, c.y, label=i, linewidth=c.thick, color=c.color)
             if c.type == 2:
                 if c.i > 1:
@@ -63,7 +65,7 @@ def show_curves():
                     t1 = np.arange(mn, mx, 0.01)
                     ax.plot(Bezier(t1, c.x[0], c.x[c.i-1], c.x, c.i), Bezier(t1, c.x[0], c.x[c.i-1], c.y, c.i), label=i,
                             linewidth=c.thick, color=c.color)
-                    #t1 = np.arange(c.x[0], c.x[c.i-1], 0.1)
+                    # t1 = np.arange(c.x[0], c.x[c.i-1], 0.1)
                     # ax.plot(Bezier(t1, c.x[0], c.x[c.i-1], c.x, c.i), Bezier(t1, c.x[0], c.x[c.i-1], c.y, c.i), label=i,
                     #       linewidth=c.thick, color=c.color)
             if c.type == 6:
@@ -90,22 +92,19 @@ def show_curves():
                         #       linewidth=c.thick, color=c.color)
             if c.type == 5:
                 if c.i > 1:
-                    # print("here")
                     M = deterMnofs3(c.x, c.y, c.i)
-                    # print("here")
                     for k in range(1, c.i):
-                        # print(k)
                         mx = max(c.x[k-1], c.x[k])
                         mn = min(c.x[k-1], c.x[k])
                         hk = mx-mn
                         t1 = np.arange(mn, mx, hk/100)
                         ax.plot(t1, OISF3(t1, c.x[k], c.y[k], c.x[k-1], c.y[k-1], M[k], M[k-1]), label=i,
                                 linewidth=c.thick, color=c.color)
-                        # ax.plot(t1, t1,
-                        #       linewidth=c.thick, color=c.color)
             if c.i > 1:
                 ax.annotate(str(nclabel+1),
                             ((9*c.x[0]+c.x[1])/10, (9*c.y[0]+c.y[1])/10), color="red")
+                nclabel += 1
+            else:
                 nclabel += 1
 
     for c in curves:
@@ -177,7 +176,7 @@ def on_release(event):
 def move_point(event):
     global canv_add_point, canv_motion, canv_release, canvas
     canvas.mpl_disconnect(canv_add_point)
-    #canv_choose_point = canvas.mpl_connect('button_press_event', change_point)
+    # canv_choose_point = canvas.mpl_connect('button_press_event', change_point)
     canv_add_point = canvas.mpl_connect('button_press_event', moving_point)
     canv_motion = canvas.mpl_connect('motion_notify_event', on_motion)
     canv_release = canvas.mpl_connect('button_release_event', on_release)
@@ -186,14 +185,14 @@ def move_point(event):
 def choose_point(event):
     global canv_add_point, canvas
     canvas.mpl_disconnect(canv_add_point)
-    #canv_choose_point = canvas.mpl_connect('button_press_event', change_point)
+    # canv_choose_point = canvas.mpl_connect('button_press_event', change_point)
     canv_add_point = canvas.mpl_connect('button_press_event', change_point)
 
 
 def add_point(event):
     global canv_add_point
     canvas.mpl_disconnect(canv_add_point)
-    #canv_choose_point = canvas.mpl_connect('button_press_event', change_point)
+    # canv_choose_point = canvas.mpl_connect('button_press_event', change_point)
     canv_add_point = canvas.mpl_connect('button_press_event', add_point_to)
 
 
@@ -292,6 +291,7 @@ def change_activ_curve(event):
     if k < n:
         i = k
     actcurindlabel.set_text(str(i+1))
+    show_curves()
 
 
 def del_point(event):
@@ -348,8 +348,8 @@ def division_curve_point(event):
         # if t>=c.x[0] and t<=c.x[n-1]:
         X = c.x
         Y = c.y
-        np = c.i
-        c.x, c.y = deCasteljauleft(t, X[0], X[np-1], X, Y, np)
+        npp = c.i
+        c.x, c.y = deCasteljauleft(t, X[0], X[npp-1], X, Y, npp)
         # print(c.x)
         d = Curve()
         d.i = c.i
@@ -357,9 +357,11 @@ def division_curve_point(event):
         d.type = c.type
         d.color = c.color
         d.thick = c.thick
-        d.x, d.y = deCasteljauright(t, X[0], X[np-1], X, Y, np)
+        d.x, d.y = deCasteljauright(t, X[0], X[npp-1], X, Y, npp)
         n += 1
-        curves.append(d)
+        curves = np.append(curves, [d])
+        # print(curves)
+        # curves.append(d)
         show_curves()
 
 
@@ -375,7 +377,7 @@ def del_curve(event):
     if n > 0:
         if n == 1:
             curves = []
-        if n == 2:
+        elif n == 2:
             curves = np.delete(curves, i)
             # print("hello")
             # print(curves[0])
@@ -405,19 +407,27 @@ def transpose(event):
         curves[a].y = alpha*curves[b].y + (1-alpha)*yp
         curves[a].w = alpha*curves[b].w + (1-alpha)*wp
         alpha += delta
-        sleep(1)
-        print("śpij kochany śpij")
+        sleep(0.1)
+        # print("śpij kochany śpij")
         show_curves()
+    # curves[a].x = alpha*curves[b].x + (1-alpha)*xp
+    # curves[a].y = alpha*curves[b].y + (1-alpha)*yp
+    # curves[a].w = alpha*curves[b].w + (1-alpha)*wp
+    # alpha += delta
+    # sleep(0.1)
+    #    print("śpij kochany śpij")
+    # show_curves()
 
 
 def downdeg(event):
     global curves, i, n
     c = curves[i]
     if c.type == 3:
-        c.x, c.y = degdown(c.x, c.y, c.i)
-        c.i -= 1
-        c.w = np.delete(c.w, c.i)
-        show_curves()
+        if c.i > 1:
+            c.x, c.y = degdown(c.x, c.y, c.i)
+            c.i -= 1
+            c.w = np.delete(c.w, c.i)
+            show_curves()
 
 
 def updeg(event):
@@ -430,7 +440,7 @@ def updeg(event):
         show_curves()
 
 
-def C1(event):
+def G1(event):
     global curves, i, activtext, n
     j = int(activtext) - 1
     if j < n:
@@ -454,6 +464,27 @@ def C1(event):
         show_curves()
 
 
+def C1(event):
+    global curves, i, activtext, n
+    j = int(activtext) - 1
+    if j < n:
+       # print(i)
+        # print(j)
+        c = curves[i]
+        d = curves[j]
+        vx = c.x[c.i-1] - d.x[0]
+        vy = c.y[c.i-1] - d.y[0]
+        d.shiftv(vx, vy)
+        n1 = c.i-1
+        m1 = d.i-1
+        if d.i > 1:
+            # d.x[1] = n1/(pc-pa)*(c.x[n1] - c.x[n1-1])*(pb-pc)/m1 + d.x[0]
+            # d.y[1] = n1/(pc-pa)*(c.y[n1] - c.y[n1-1])*(pb-pc)/m1 + d.y[0]
+            d.x[1] = d.x[0]*2 - c.x[n1-1]
+            d.y[1] = d.y[0]*2 - c.y[n1-1]
+        show_curves()
+
+
 def scale(event):
     global curves, i, activtext
     c = curves[i]
@@ -471,3 +502,46 @@ def rotate(event):
 def save(event):
     global activtext
     plt.savefig(activtext)
+
+
+def reverse_points(event):
+    global curves, i
+    c = curves[i]
+    c.reverse_points()
+    show_curves()
+
+
+def show_dialog(event):
+    dialog = Gtk.Dialog("Typy krzywych")
+    lab1 = Gtk.Label("1 -- łamana")
+    lab2 = Gtk.Label("2 -- krzywa interpolacyjna")
+    lab3 = Gtk.Label("3 -- krzywa Beziera")
+    lab4 = Gtk.Label("4 -- NIFS3")
+    lab5 = Gtk.Label("5 -- OIFS3")
+    lab6 = Gtk.Label("6 -- wymierna krzywa Beziera")
+    buturl = Gtk.LinkButton(
+        "https://matplotlib.org/examples/color/named_colors.html", "dostępne kolory")
+    box = dialog.get_content_area()
+    box.add(lab1)
+    box.add(lab2)
+    box.add(lab3)
+    box.add(lab4)
+    box.add(lab5)
+    box.add(lab6)
+    box.add(buturl)
+    dialog.show_all()
+    dialog.run()
+    dialog.destroy()
+
+
+def point_value(event):
+    global curves, i, activtext, activx, activy, entryx, entryy
+    vp = float(activtext)
+    print(vp)
+    c = curves[i]
+    if c.type == 3:
+        activx, activy = Bezierpointvalue(
+            vp, c.x[0], c.x[c.i-1], c.x, c.y, c.i)
+        # activx, activy = deCasteljau(vp, c.x[0], c.x[c.i-1], c.x, c.y, c.i)
+        entryx.set_text(str(activx))
+        entryy.set_text(str(activy))

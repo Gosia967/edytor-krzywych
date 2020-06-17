@@ -63,6 +63,7 @@ def deCasteljau(t, a, b, X, Y, n):
     Wx = X
     Wy = Y
     u = (t-a)/(b-a)
+    #u = (t-100)/100
     for k in range(1, n):
         Wxnew = np.array([])
         Wynew = np.array([])
@@ -151,28 +152,32 @@ def OISF3(t, xk, yk, xkm1, ykm1, Mk, Mkm1):
 
 
 def deterMnofs3(X, Y, n):
+    h = np.zeros(n+1)
     q = np.array([])
     u = np.array([])
     s = np.array([])
     q = np.append(q, [0])
     u = np.append(u, [0])
-    s = np.append(u, [1])
+    s = np.append(s, [1])
+   # hn=X[1]-X[0]
+    # hnm1=X[n-1]=X[n-2]
+    #dnm1 = ((Y[k+1]-Y[k])/hkp1 - (Y[k]-Y[k-1])/hk)*6/(hk+hkp1)
     for k in range(1, n-1):
-        hk = X[k]-X[k-1]
-        hkp1 = X[k+1]-X[k]
-        lk = hk/(hk+hkp1)
+        h[k] = X[k]-X[k-1]
+        h[k+1] = X[k+1]-X[k]
+        lk = h[k]/(h[k]+h[k+1])
         pk = lk*q[k-1]+2
         q = np.append(q, [(lk-1)/pk])
         s = np.append(s, [-lk*s[k-1]/pk])
         u = np.append(
-            u, [(((Y[k+1]-Y[k])/hkp1 - (Y[k]-Y[k-1])/hk)*6/(hk+hkp1) - lk * u[k-1])/pk])
+            u, [(((Y[k+1]-Y[k])/h[k+1] - (Y[k]-Y[k-1])/h[k])*6/(h[k]+h[k+1]) - lk * u[k-1])/pk])
     t = np.zeros(n)
     v = np.zeros(n)
     t[n-1] = 1
     for k in range(n-2, 0, -1):
         t[k] = q[k]*t[k+1]+s[k]
         v[k] = q[k]*v[k+1]+u[k]
-    M = np.zeros(n)
+    M = np.zeros(n+1)
     hn = X[n-1]-X[n-2]
     hnp1 = X[1]-X[0]
     ln = hn/(hn+hnp1)
@@ -181,6 +186,9 @@ def deterMnofs3(X, Y, n):
     M[0] = M[n-1]
     for k in range(1, n-1):
         M[k] = v[k]+t[k]*M[n-1]
+    # for k in range(n-2, 0, -1):
+      #   M[k] = v[k]+t[k]*M[k+1]
+    M[n] = M[1]
     return M
 
 
@@ -199,7 +207,7 @@ def Bezierpointvalue(t, a, b, X, Y, n):
     for k in range(0, n):
         nok = math.factorial(n-1)/(math.factorial(n-1-k)*math.factorial(k))
         Qx = np.append(Qx, [X[k]*nok])
-        Qy = np.append(Qy, [X[k]*nok])
+        Qy = np.append(Qy, [Y[k]*nok])
     if u <= 0.5:
         v = u/(1-u)
         return Horner(Qx, n-1, v)*(1-u)**(n-1), Horner(Qy, n-1, v)*(1-u)**(n-1)
@@ -235,15 +243,15 @@ def degdown(X, Y, n):
                               (1-(n-1)/(n-1-k))*XII[k-1]])
         YII = np.append(YII, [(n-1)/(n-1-k)*Y[n-1-k] +
                               (1-(n-1)/(n-1-k))*YII[k-1]])
-    print(np.size(XI))
-    print(np.size(XII))
+    # print(np.size(XI))
+    # print(np.size(XII))
     XII = XII[::-1]
     YII = YII[::-1]
-    print(XI)
-    print(XII)
+    # print(XI)
+    # print(XII)
     xs = 0.5*XI[math.floor((n-1)/2)] + 0.5*XII[0]
     ys = 0.5*YI[math.floor((n-1)/2)] + 0.5*YII[0]
-    print(xs)
+    # print(xs)
     XI = np.delete(XI, math.floor((n-1)/2))
     XII = np.delete(XII, 0)
     YI = np.delete(YI, math.floor((n-1)/2))
@@ -252,6 +260,5 @@ def degdown(X, Y, n):
     YI = np.append(YI, [ys])
     XI = np.append(XI, XII)
     YI = np.append(YI, YII)
-    print(XI)
+    # print(XI)
     return XI, YI
-

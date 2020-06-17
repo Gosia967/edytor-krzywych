@@ -98,3 +98,7 @@ class Curve:
 
     def change_point_color(self, col):
         self.points_color = col
+
+    def reverse_points(self):
+        self.x = self.x[::-1]
+        self.y = self.y[::-1]
