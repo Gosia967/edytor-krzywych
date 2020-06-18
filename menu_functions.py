@@ -443,7 +443,7 @@ def updeg(event):
 def G1(event):
     global curves, i, activtext, n
     j = int(activtext) - 1
-    if j < n:
+    if j < n and j != i:
        # print(i)
         # print(j)
         c = curves[i]
@@ -457,17 +457,17 @@ def G1(event):
         n1 = c.i-1
         m1 = d.i-1
         if d.i > 1:
-            d.x[1] = (d.x[0]*(n1/(pc-pa)+m1/(pb-pc)) -
-                      c.x[n1-1]*n1/(pc-pa))*(pb-pc)/m1
-            d.y[1] = (d.y[0]*(n1/(pc-pa)+m1/(pb-pc)) -
-                      c.y[n1-1]*n1/(pc-pa))*(pb-pc)/m1
+            d.x[1] = (d.x[0]*(n1/abs(pc-pa)+m1/abs(pb-pc)) -
+                      c.x[n1-1]*n1/abs(pc-pa))*abs(pb-pc)/m1
+            d.y[1] = (d.y[0]*(n1/abs(pc-pa)+m1/abs(pb-pc)) -
+                      c.y[n1-1]*n1/abs(pc-pa))*abs(pb-pc)/m1
         show_curves()
 
 
 def C1(event):
     global curves, i, activtext, n
     j = int(activtext) - 1
-    if j < n:
+    if j < n and j != i:
        # print(i)
         # print(j)
         c = curves[i]
@@ -545,3 +545,17 @@ def point_value(event):
         # activx, activy = deCasteljau(vp, c.x[0], c.x[c.i-1], c.x, c.y, c.i)
         entryx.set_text(str(activx))
         entryy.set_text(str(activy))
+
+
+def join(event):
+    global curves, i, activtext
+    j = int(activtext) - 1
+    if j < n and j != i:
+        c = curves[i]
+        d = curves[j]
+        c.x = np.append(c.x, d.x)
+        c.y = np.append(c.y, d.y)
+        c.w = np.append(c.w, d.w)
+        c.i = c.i+d.i
+        curves = np.delete(curves, j)
+        show_curves()
